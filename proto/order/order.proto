@@ -1,0 +1,43 @@
+syntax="proto3";
+package proto;
+
+option go_package = "./proto/order";
+import "google/api/annotations.proto";
+
+message OrderItem {
+    string orderItemName = 1;
+    int64 orderItemQuantity = 2;
+    int64 orderItemPrice = 3;
+}
+
+message AddOrderRequest {
+    repeated OrderItem orderItems = 1;
+    int64 orderTotalPrice = 2;
+    string restaurantName = 3;
+}
+
+message AddOrderItemResponse {
+    string message = 1;
+    string error = 2;
+    int64 statusCode = 3;
+}
+message Hllo{
+    string message = 1;
+
+}
+message NoParams{}
+
+service OrderService {
+   rpc AddOrder(AddOrderRequest) returns (AddOrderItemResponse){
+    option (google.api.http) = {
+        post: "/order/add"
+        body: "*"
+    };
+   }
+    rpc Payment(Hllo) returns (NoParams) {
+        option (google.api.http) = {
+            post: "/order/payment"
+            body: "*"
+        };
+    }
+}
