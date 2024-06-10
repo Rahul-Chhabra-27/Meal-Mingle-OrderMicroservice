@@ -21,15 +21,20 @@ type PageVariables struct {
 	Contact string
 }
 
-func Caller(amount int) {
+func Caller(amount int) (string){
+	statusChannel := make(chan string);
 	router := gin.Default()
 	router.LoadHTMLGlob("*.html")
 	router.GET("/", func(c *gin.Context) {
 		App(c, amount*100)
 	})
-	// App(c,amount * 100)
+	router.GET("/payment-failed", func(c *gin.Context) {	
+		PaymentFaliure(c,statusChannel)
+	})
 
-	router.GET("/payment-success", PaymentSuccess)
+	router.GET("/payment-success",func (c *gin.Context){
+		PaymentSuccess(c,statusChannel)
+	})
 	srv := &http.Server{
 		Addr:    ":8089",
 		Handler: router,
@@ -51,6 +56,8 @@ func Caller(amount int) {
 		}
 		fmt.Println("Server gracefully stopped")
 	})
+	status := <- statusChannel;
+	return status;
 }
 
 func App(c *gin.Context, amount int) {
@@ -90,8 +97,8 @@ func App(c *gin.Context, amount int) {
 	c.HTML(http.StatusOK, "app.html", HomePageVars)
 }
 
-func PaymentSuccess(c *gin.Context) {
-
+func PaymentSuccess(c *gin.Context, statusChannel chan <- string)  {
+	
 	paymentid := c.Query("paymentid")
 	orderid := c.Query("orderid")
 	signature := c.Query("signature")
@@ -99,8 +106,20 @@ func PaymentSuccess(c *gin.Context) {
 	fmt.Println(paymentid, "paymentid")
 	fmt.Println(orderid, "orderid")
 	fmt.Println(signature, "signature")
+
+	statusChannel <- "Payment Successfull"
+	fmt.Println("Payment Successfull")
+	c.JSON(http.StatusOK, gin.H{ //return the payment details
+		"paymentid": paymentid,
+		"orderid":   orderid,
+		"signature": signature,
+		"message":   "Payment Successfull",
+	})
 }
 
-// func PaymentFaliure(c *gin.Context) {
-
-// }
+func PaymentFaliure(c *gin.Context, statusChannel chan <- string) {
+	statusChannel <- "Payment Failed"
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Payment Failed",
+	})
+}

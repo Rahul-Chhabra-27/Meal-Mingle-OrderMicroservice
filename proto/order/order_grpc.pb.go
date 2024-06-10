@@ -23,7 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrderServiceClient interface {
 	AddOrder(ctx context.Context, in *AddOrderRequest, opts ...grpc.CallOption) (*AddOrderItemResponse, error)
-	Payment(ctx context.Context, in *Hllo, opts ...grpc.CallOption) (*NoParams, error)
+	OrderHistory(ctx context.Context, in *OrderHistoryRequest, opts ...grpc.CallOption) (*OrderHistoryResponse, error)
 }
 
 type orderServiceClient struct {
@@ -43,9 +43,9 @@ func (c *orderServiceClient) AddOrder(ctx context.Context, in *AddOrderRequest, 
 	return out, nil
 }
 
-func (c *orderServiceClient) Payment(ctx context.Context, in *Hllo, opts ...grpc.CallOption) (*NoParams, error) {
-	out := new(NoParams)
-	err := c.cc.Invoke(ctx, "/proto.OrderService/Payment", in, out, opts...)
+func (c *orderServiceClient) OrderHistory(ctx context.Context, in *OrderHistoryRequest, opts ...grpc.CallOption) (*OrderHistoryResponse, error) {
+	out := new(OrderHistoryResponse)
+	err := c.cc.Invoke(ctx, "/proto.OrderService/OrderHistory", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (c *orderServiceClient) Payment(ctx context.Context, in *Hllo, opts ...grpc
 // for forward compatibility
 type OrderServiceServer interface {
 	AddOrder(context.Context, *AddOrderRequest) (*AddOrderItemResponse, error)
-	Payment(context.Context, *Hllo) (*NoParams, error)
+	OrderHistory(context.Context, *OrderHistoryRequest) (*OrderHistoryResponse, error)
 	mustEmbedUnimplementedOrderServiceServer()
 }
 
@@ -68,8 +68,8 @@ type UnimplementedOrderServiceServer struct {
 func (UnimplementedOrderServiceServer) AddOrder(context.Context, *AddOrderRequest) (*AddOrderItemResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddOrder not implemented")
 }
-func (UnimplementedOrderServiceServer) Payment(context.Context, *Hllo) (*NoParams, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Payment not implemented")
+func (UnimplementedOrderServiceServer) OrderHistory(context.Context, *OrderHistoryRequest) (*OrderHistoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method OrderHistory not implemented")
 }
 func (UnimplementedOrderServiceServer) mustEmbedUnimplementedOrderServiceServer() {}
 
@@ -102,20 +102,20 @@ func _OrderService_AddOrder_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OrderService_Payment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Hllo)
+func _OrderService_OrderHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OrderHistoryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OrderServiceServer).Payment(ctx, in)
+		return srv.(OrderServiceServer).OrderHistory(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.OrderService/Payment",
+		FullMethod: "/proto.OrderService/OrderHistory",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrderServiceServer).Payment(ctx, req.(*Hllo))
+		return srv.(OrderServiceServer).OrderHistory(ctx, req.(*OrderHistoryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -132,8 +132,8 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _OrderService_AddOrder_Handler,
 		},
 		{
-			MethodName: "Payment",
-			Handler:    _OrderService_Payment_Handler,
+			MethodName: "OrderHistory",
+			Handler:    _OrderService_OrderHistory_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

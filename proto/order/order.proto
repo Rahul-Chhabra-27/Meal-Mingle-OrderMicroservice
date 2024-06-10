@@ -21,23 +21,28 @@ message AddOrderItemResponse {
     string error = 2;
     int64 statusCode = 3;
 }
-message Hllo{
-    string message = 1;
-
+message Order {
+    repeated OrderItem orderItems = 1;
+    int64 orderTotalPrice = 2;
+    string restaurantName = 3;
 }
-message NoParams{}
-
+message OrderHistoryRequest {}
+message OrderHistoryResponse {
+    repeated Order orders = 1;
+    string message = 4;
+    string error = 5;
+    int64 statusCode = 6;
+}
 service OrderService {
    rpc AddOrder(AddOrderRequest) returns (AddOrderItemResponse){
-    option (google.api.http) = {
-        post: "/order/add"
-        body: "*"
-    };
-   }
-    rpc Payment(Hllo) returns (NoParams) {
         option (google.api.http) = {
-            post: "/order/payment"
+            post: "/order/add"
             body: "*"
+        };
+   }
+    rpc OrderHistory(OrderHistoryRequest) returns (OrderHistoryResponse){
+        option (google.api.http) = {
+            get: "/order/history"
         };
     }
 }
