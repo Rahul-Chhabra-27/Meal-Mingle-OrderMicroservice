@@ -14,27 +14,34 @@ message AddOrderRequest {
     repeated OrderItem orderItems = 1;
     int64 orderTotalPrice = 2;
     string restaurantName = 3;
+    string shippingAddress = 4;
 }
-
-message AddOrderItemResponse {
+message data {
+    repeated Order order = 1;
+}
+message AddOrderResponse {
     string message = 1;
     string error = 2;
     int64 statusCode = 3;
+    data data = 4;
 }
 message Order {
-    repeated OrderItem orderItems = 1;
-    int64 orderTotalPrice = 2;
-    string restaurantName = 3;
+    string orderId = 1;
+    repeated OrderItem orderItems = 2;
+    int64 orderTotalPrice = 3;
+    string restaurantName = 4;
+    string shippingAddress = 5;
+    string orderStatus=6;
 }
 message OrderHistoryRequest {}
 message OrderHistoryResponse {
-    repeated Order orders = 1;
+    data data = 1;
     string message = 4;
     string error = 5;
     int64 statusCode = 6;
 }
 service OrderService {
-   rpc AddOrder(AddOrderRequest) returns (AddOrderItemResponse){
+   rpc AddOrder(AddOrderRequest) returns (AddOrderResponse){
         option (google.api.http) = {
             post: "/order/add"
             body: "*"

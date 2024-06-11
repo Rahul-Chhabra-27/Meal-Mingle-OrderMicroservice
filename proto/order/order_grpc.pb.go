@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrderServiceClient interface {
-	AddOrder(ctx context.Context, in *AddOrderRequest, opts ...grpc.CallOption) (*AddOrderItemResponse, error)
+	AddOrder(ctx context.Context, in *AddOrderRequest, opts ...grpc.CallOption) (*AddOrderResponse, error)
 	OrderHistory(ctx context.Context, in *OrderHistoryRequest, opts ...grpc.CallOption) (*OrderHistoryResponse, error)
 }
 
@@ -34,8 +34,8 @@ func NewOrderServiceClient(cc grpc.ClientConnInterface) OrderServiceClient {
 	return &orderServiceClient{cc}
 }
 
-func (c *orderServiceClient) AddOrder(ctx context.Context, in *AddOrderRequest, opts ...grpc.CallOption) (*AddOrderItemResponse, error) {
-	out := new(AddOrderItemResponse)
+func (c *orderServiceClient) AddOrder(ctx context.Context, in *AddOrderRequest, opts ...grpc.CallOption) (*AddOrderResponse, error) {
+	out := new(AddOrderResponse)
 	err := c.cc.Invoke(ctx, "/proto.OrderService/AddOrder", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (c *orderServiceClient) OrderHistory(ctx context.Context, in *OrderHistoryR
 // All implementations must embed UnimplementedOrderServiceServer
 // for forward compatibility
 type OrderServiceServer interface {
-	AddOrder(context.Context, *AddOrderRequest) (*AddOrderItemResponse, error)
+	AddOrder(context.Context, *AddOrderRequest) (*AddOrderResponse, error)
 	OrderHistory(context.Context, *OrderHistoryRequest) (*OrderHistoryResponse, error)
 	mustEmbedUnimplementedOrderServiceServer()
 }
@@ -65,7 +65,7 @@ type OrderServiceServer interface {
 type UnimplementedOrderServiceServer struct {
 }
 
-func (UnimplementedOrderServiceServer) AddOrder(context.Context, *AddOrderRequest) (*AddOrderItemResponse, error) {
+func (UnimplementedOrderServiceServer) AddOrder(context.Context, *AddOrderRequest) (*AddOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddOrder not implemented")
 }
 func (UnimplementedOrderServiceServer) OrderHistory(context.Context, *OrderHistoryRequest) (*OrderHistoryResponse, error) {

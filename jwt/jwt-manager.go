@@ -9,7 +9,6 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
@@ -58,17 +57,17 @@ func UnaryInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, 
 
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return nil, status.Errorf(codes.Unauthenticated, "metadata is not provided")
+		return nil, status.Errorf(401, "metadata is not provided")
 	}
 	tokenString := md.Get("authorization")
 	if len(tokenString) == 0 {
-		return nil, status.Errorf(codes.Unauthenticated, "authorization token is not provided")
+		return nil, status.Errorf(401, "authorization token is not provided")
 	}
 	token := strings.Split(tokenString[0], " ")
 	// Parse JWT token
 	claims, err := VerifyToken(token[1])
 	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "token is invalid: %v", err)
+		return nil, status.Errorf(401, "token is invalid: %v", err)
 	}
 	// Pass useremail to context for further use
 	ctx = context.WithValue(ctx, "userEmail", claims.UserEmail)

@@ -48,8 +48,8 @@ func GetRestaurantConnector(dsn string) (*gorm.DB, error) {
 	restaurantDB.AutoMigrate(&model.Restaurant{})
 	return restaurantDB, nil
 }
-func ValidateOrderFields(restaurantName string, orderAmount int64,) bool {
-	if restaurantName == "" || orderAmount == 0  {
+func ValidateOrderFields(shippingAddress string ,restaurantName string, orderAmount int64,) bool {
+	if shippingAddress == "" || restaurantName == "" || orderAmount == 0  {
 		return false
 	}
 	return true

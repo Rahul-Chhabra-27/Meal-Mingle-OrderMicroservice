@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
-	orderpb "order-microservice/proto/order"
-	"order-microservice/model"
+	"fmt"
 	"order-microservice/config"
+	"order-microservice/model"
+	orderpb "order-microservice/proto/order"
+	"strconv"
 )
 
 func (*OrderService) OrderHistory(ctx context.Context, resquest *orderpb.OrderHistoryRequest) (*orderpb.OrderHistoryResponse, error) {
@@ -22,19 +24,21 @@ func (*OrderService) OrderHistory(ctx context.Context, resquest *orderpb.OrderHi
 	user.Email = userEmail
 	userDBConnector, err := config.GetUserConnector(config.GoDotEnvVariable("DB_CONFIG"))
 	if err != nil {
+		fmt.Println("Failed to connect to database")
 		return &orderpb.OrderHistoryResponse{
 			Message:    "",
 			StatusCode: 500,
-			Error:      "Failed to connect to database",
+			Error:      "Internal Server Error",
 		}, nil
 	}
 	userDBConnector.Where("email = ?", user.Email).First(&user)
 	restaurantDBConnector, err := config.GetRestaurantConnector(config.GoDotEnvVariable("DB_CONFIG"))
 	if err != nil {
+		fmt.Println("Failed to connect to database")
 		return &orderpb.OrderHistoryResponse{
 			Message:    "",
 			StatusCode: 500,
-			Error:      "Failed to connect to database",
+			Error:      "Internal Server Error",
 		}, nil
 	}
 
@@ -43,6 +47,7 @@ func (*OrderService) OrderHistory(ctx context.Context, resquest *orderpb.OrderHi
 	orderDBConnector.Where("user_id = ?", user.ID).Find(&orders)
 	// create the response
 	var orderHistoryResponse orderpb.OrderHistoryResponse
+	orderHistoryResponse.Data = &orderpb.Data{}
 	for _, order := range orders {
 		// for every order we are fetching the order items
 		var orderItems []model.OrderItem
@@ -52,15 +57,18 @@ func (*OrderService) OrderHistory(ctx context.Context, resquest *orderpb.OrderHi
 		var orderItemsResponse []*orderpb.OrderItem
 		for _, orderItem := range orderItems {
 			orderItemsResponse = append(orderItemsResponse, &orderpb.OrderItem{
-				OrderItemName: orderItem.Name,
-				OrderItemPrice: orderItem.Price,
+				OrderItemName:     orderItem.Name,
+				OrderItemPrice:    orderItem.Price,
 				OrderItemQuantity: orderItem.Quantity,
 			})
 		}
-		orderHistoryResponse.Orders = append(orderHistoryResponse.Orders, &orderpb.Order{
-			OrderItems: orderItemsResponse,
+		orderHistoryResponse.Data.Order = append(orderHistoryResponse.Data.Order, &orderpb.Order{
+			OrderId: strconv.FormatUint(uint64(order.ID), 10),
+			OrderItems:      orderItemsResponse,
 			OrderTotalPrice: order.TotalPrice,
-			RestaurantName: restaurant.Name,
+			RestaurantName:  restaurant.Name,
+			OrderStatus:     order.Status,
+			ShippingAddress: order.ShippingAddress,
 		})
 		orderHistoryResponse.Message = "Successfully fetched order history"
 		orderHistoryResponse.StatusCode = 200

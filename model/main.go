@@ -17,6 +17,7 @@ type Order struct {
 	Status string 
 	Discount int64
 	RestaurantId uint `gorm:"foreignKey:RestaurantId;references:ID"` 
+	ShippingAddress string
 }
 
 type User struct {
