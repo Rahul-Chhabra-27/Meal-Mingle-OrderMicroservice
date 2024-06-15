@@ -43,13 +43,13 @@ message OrderHistoryResponse {
 service OrderService {
    rpc AddOrder(AddOrderRequest) returns (AddOrderResponse){
         option (google.api.http) = {
-            post: "/order/add"
+            post: "/api/orders"
             body: "*"
         };
    }
     rpc OrderHistory(OrderHistoryRequest) returns (OrderHistoryResponse){
         option (google.api.http) = {
-            get: "/order/history"
+            get: "/api/orders"
         };
     }
 }

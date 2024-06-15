@@ -28,7 +28,7 @@ func startServer() {
 	godotenv.Load(".env")
 	fmt.Println("Starting order-microservice server...")
 	// Connect to the database
-	orderDB, orderItemDB, err := config.ConnectDB(config.GoDotEnvVariable("DB_CONFIG"))
+	orderDB, orderItemDB, err := config.ConnectDB()
 	orderDBConnector = orderDB
 	orderItemDBConnector = orderItemDB
 	

@@ -27,7 +27,7 @@ func (*OrderService) AddOrder(ctx context.Context, request *orderpb.AddOrderRequ
 	// fetching the user from user email.
 	var user model.User
 	user.Email = userEmail
-	userDBConnector, err := config.GetUserConnector(config.GoDotEnvVariable("DB_CONFIG"))
+	userDBConnector, err := config.GetUserConnector()
 	if err != nil {
 		fmt.Println("Failed to connect to database")
 		return &orderpb.AddOrderResponse{
@@ -40,7 +40,7 @@ func (*OrderService) AddOrder(ctx context.Context, request *orderpb.AddOrderRequ
 	// fetching the restaurant from restaurant name.
 	var restaurant model.Restaurant
 	restaurant.Name = request.RestaurantName
-	restaurantDBConnector, err := config.GetRestaurantConnector(config.GoDotEnvVariable("DB_CONFIG"))
+	restaurantDBConnector, err := config.GetRestaurantConnector()
 	if err != nil {
 		fmt.Println("Failed to connect to database")
 		return &orderpb.AddOrderResponse{

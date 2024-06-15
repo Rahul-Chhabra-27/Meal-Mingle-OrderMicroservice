@@ -89,7 +89,7 @@ func RegisterOrderServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/proto.OrderService/AddOrder", runtime.WithHTTPPathPattern("/order/add"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/proto.OrderService/AddOrder", runtime.WithHTTPPathPattern("/api/orders"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -114,7 +114,7 @@ func RegisterOrderServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/proto.OrderService/OrderHistory", runtime.WithHTTPPathPattern("/order/history"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/proto.OrderService/OrderHistory", runtime.WithHTTPPathPattern("/api/orders"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -178,7 +178,7 @@ func RegisterOrderServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/proto.OrderService/AddOrder", runtime.WithHTTPPathPattern("/order/add"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/proto.OrderService/AddOrder", runtime.WithHTTPPathPattern("/api/orders"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -200,7 +200,7 @@ func RegisterOrderServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/proto.OrderService/OrderHistory", runtime.WithHTTPPathPattern("/order/history"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/proto.OrderService/OrderHistory", runtime.WithHTTPPathPattern("/api/orders"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -220,9 +220,9 @@ func RegisterOrderServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 }
 
 var (
-	pattern_OrderService_AddOrder_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"order", "add"}, ""))
+	pattern_OrderService_AddOrder_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"api", "orders"}, ""))
 
-	pattern_OrderService_OrderHistory_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"order", "history"}, ""))
+	pattern_OrderService_OrderHistory_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"api", "orders"}, ""))
 )
 
 var (

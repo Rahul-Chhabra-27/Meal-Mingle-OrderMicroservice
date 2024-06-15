@@ -28,11 +28,13 @@ func Caller(amount int) (string){
 	router.GET("/", func(c *gin.Context) {
 		App(c, amount*100)
 	})
-	router.GET("/payment-failed", func(c *gin.Context) {	
+	router.GET("/failed", func(c *gin.Context) {	
+		fmt.Println("Payment Failed")
 		PaymentFaliure(c,statusChannel)
 	})
 
-	router.GET("/payment-success",func (c *gin.Context){
+	router.GET("/success",func (c *gin.Context){
+		fmt.Println("Payment Page")
 		PaymentSuccess(c,statusChannel)
 	})
 	srv := &http.Server{
@@ -56,8 +58,15 @@ func Caller(amount int) (string){
 		}
 		fmt.Println("Server gracefully stopped")
 	})
-	status := <- statusChannel;
-	return status;
+	 // Wait for a payment status to be sent to the channel or for a timeout
+	select
+	{
+	case status := <-statusChannel:
+		return status
+	case <-time.After(1 * time.Minute):
+		return "payment-failed"
+	}
+	
 }
 
 func App(c *gin.Context, amount int) {
@@ -98,7 +107,7 @@ func App(c *gin.Context, amount int) {
 }
 
 func PaymentSuccess(c *gin.Context, statusChannel chan <- string)  {
-	
+	fmt.Println("Payment Successfull")
 	paymentid := c.Query("paymentid")
 	orderid := c.Query("orderid")
 	signature := c.Query("signature")
@@ -109,17 +118,10 @@ func PaymentSuccess(c *gin.Context, statusChannel chan <- string)  {
 
 	statusChannel <- "Payment Successfull"
 	fmt.Println("Payment Successfull")
-	c.JSON(http.StatusOK, gin.H{ //return the payment details
-		"paymentid": paymentid,
-		"orderid":   orderid,
-		"signature": signature,
-		"message":   "Payment Successfull",
-	})
+	c.Redirect(http.StatusMovedPermanently, "http://localhost:3000")
 }
 
 func PaymentFaliure(c *gin.Context, statusChannel chan <- string) {
 	statusChannel <- "Payment Failed"
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Payment Failed",
-	})
+	c.Redirect(http.StatusMovedPermanently, "http://localhost:3000")
 }

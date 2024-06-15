@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func (*OrderService) OrderHistory(ctx context.Context, resquest *orderpb.OrderHistoryRequest) (*orderpb.OrderHistoryResponse, error) {
+func (*OrderService) OrderHistory(ctx context.Context, request *orderpb.OrderHistoryRequest) (*orderpb.OrderHistoryResponse, error) {
 	// fetch the user email from the context
 	userEmail, ok := ctx.Value("userEmail").(string)
 	if !ok {
@@ -22,7 +22,7 @@ func (*OrderService) OrderHistory(ctx context.Context, resquest *orderpb.OrderHi
 	// fetch the user from the user email
 	var user model.User
 	user.Email = userEmail
-	userDBConnector, err := config.GetUserConnector(config.GoDotEnvVariable("DB_CONFIG"))
+	userDBConnector, err := config.GetUserConnector()
 	if err != nil {
 		fmt.Println("Failed to connect to database")
 		return &orderpb.OrderHistoryResponse{
@@ -32,7 +32,7 @@ func (*OrderService) OrderHistory(ctx context.Context, resquest *orderpb.OrderHi
 		}, nil
 	}
 	userDBConnector.Where("email = ?", user.Email).First(&user)
-	restaurantDBConnector, err := config.GetRestaurantConnector(config.GoDotEnvVariable("DB_CONFIG"))
+	restaurantDBConnector, err := config.GetRestaurantConnector()
 	if err != nil {
 		fmt.Println("Failed to connect to database")
 		return &orderpb.OrderHistoryResponse{
@@ -70,8 +70,8 @@ func (*OrderService) OrderHistory(ctx context.Context, resquest *orderpb.OrderHi
 			OrderStatus:     order.Status,
 			ShippingAddress: order.ShippingAddress,
 		})
-		orderHistoryResponse.Message = "Successfully fetched order history"
-		orderHistoryResponse.StatusCode = 200
 	}
+	orderHistoryResponse.Message = "Successfully fetched order history"
+	orderHistoryResponse.StatusCode = 200
 	return &orderHistoryResponse, nil
 }
