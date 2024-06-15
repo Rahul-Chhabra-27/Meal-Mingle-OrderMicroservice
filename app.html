@@ -50,7 +50,7 @@ var options = {
         a = (response.razorpay_payment_id);
         b =(response.razorpay_order_id);
         c = (response.razorpay_signature)
-        window.location.replace("http://localhost:8089/success");
+        window.location.replace("http://localhost:8089/payment-complete");
     },
     "prefill": {
         "name": '{{.Name}}',
@@ -73,7 +73,7 @@ rzp1.on('payment.failed', function (response){
         (response.error.reason);
         (response.error.metadata.order_id);
         (response.error.metadata.payment_id);
-        window.location.replace("http://localhost:8089/failed");
+        window.location.replace("http://localhost:8089/payment-fail");
 
 });
 document.getElementById('rzp-button1').onclick = function(e){

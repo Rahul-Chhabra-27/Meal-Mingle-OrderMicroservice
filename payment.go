@@ -28,12 +28,12 @@ func Caller(amount int) (string){
 	router.GET("/", func(c *gin.Context) {
 		App(c, amount*100)
 	})
-	router.GET("/failed", func(c *gin.Context) {	
+	router.GET("/payment-fail", func(c *gin.Context) {	
 		fmt.Println("Payment Failed")
 		PaymentFaliure(c,statusChannel)
 	})
 
-	router.GET("/success",func (c *gin.Context){
+	router.GET("/payment-complete",func (c *gin.Context){
 		fmt.Println("Payment Page")
 		PaymentSuccess(c,statusChannel)
 	})
@@ -118,10 +118,10 @@ func PaymentSuccess(c *gin.Context, statusChannel chan <- string)  {
 
 	statusChannel <- "Payment Successfull"
 	fmt.Println("Payment Successfull")
-	c.Redirect(http.StatusMovedPermanently, "http://localhost:3000")
+	c.Redirect(http.StatusFound, "http://localhost:3000/orders")
 }
 
 func PaymentFaliure(c *gin.Context, statusChannel chan <- string) {
 	statusChannel <- "Payment Failed"
-	c.Redirect(http.StatusMovedPermanently, "http://localhost:3000")
+	c.Redirect(http.StatusFound, "http://localhost:3000/orders")
 }
