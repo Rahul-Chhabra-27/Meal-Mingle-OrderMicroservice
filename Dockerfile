@@ -10,8 +10,9 @@ COPY . .
 # Download dependencies using go mod
 RUN go mod tidy && go mod vendor
 
-# Expose PORT 8090 to the outside world
+# Expose PORT 8093 for the order microservice grpc gateway
 EXPOSE 8093
+# Expose PORT 8089 for payment gateway.
 EXPOSE 8089
 # Command to run the application when starting the container
 CMD ["go","run","."]

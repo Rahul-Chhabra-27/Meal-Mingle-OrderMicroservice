@@ -73,7 +73,7 @@ func (*OrderService) AddOrder(ctx context.Context, request *orderpb.AddOrderRequ
 		fmt.Println("Failed to add order")
 		return &orderpb.AddOrderResponse{
 			Message:    "",
-			StatusCode: int64(codes.Internal),
+			StatusCode: 500,
 			Error:      "Internal Server Error",
 		}, nil
 	}
@@ -90,7 +90,7 @@ func (*OrderService) AddOrder(ctx context.Context, request *orderpb.AddOrderRequ
 			fmt.Println("Failed to add order item")
 			return &orderpb.AddOrderResponse{
 				Error:      "Failed to add order",
-				StatusCode: int64(codes.Internal),
+				StatusCode: 500,
 				Message:    "",
 			}, nil
 		}
