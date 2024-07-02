@@ -20,6 +20,7 @@ type JWTManager struct {
 type UserClaims struct {
 	jwt.StandardClaims
 	UserEmail string
+	UserRole  string
 }
 
 func NewJWTManager(secretKey string, tokenDuration time.Duration) (*JWTManager, error) {
@@ -71,6 +72,7 @@ func UnaryInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, 
 	}
 	// Pass useremail to context for further use
 	ctx = context.WithValue(ctx, "userEmail", claims.UserEmail)
+	ctx = context.WithValue(ctx, "userRole", claims.UserRole)
 	// Proceed with the request
 	return handler(ctx, req)
 }

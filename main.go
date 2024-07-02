@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"order-microservice/config"
@@ -12,6 +10,7 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"gorm.io/gorm"
@@ -20,27 +19,49 @@ import (
 type OrderService struct {
 	orderpb.UnimplementedOrderServiceServer
 }
+const (
+	StatusOK                  = 200
+	StatusBadRequest          = 400
+	StatusUnauthorized        = 401
+	StatusForbidden           = 403
+	StatusNotFound            = 404
+	StatusInternalServerError = 500
+)
+var (
+	orderDBConnector     *gorm.DB
+	orderItemDBConnector *gorm.DB
+	logger               *zap.Logger
+)
 
-var orderDBConnector *gorm.DB
-var orderItemDBConnector *gorm.DB
+func init() {
+	var err error
+	logger, err = zap.NewDevelopment()
+	if err != nil {
+		panic(err)
+	}
+	defer logger.Sync()
+}
 
 func startServer() {
-	godotenv.Load(".env")
-	fmt.Println("Starting order-microservice server...")
+	if err := godotenv.Load(".env"); err != nil {
+		logger.Warn("Failed to load .env file", zap.Error(err))
+	} else {
+		logger.Info("Loaded .env file")
+	}
+
 	// Connect to the database
 	orderDB, orderItemDB, err := config.ConnectDB()
+	if err != nil {
+		logger.Fatal("Could not connect to the database", zap.Error(err))
+	}
 	orderDBConnector = orderDB
 	orderItemDBConnector = orderItemDB
-	
-	
-	if err != nil {
-		log.Fatalf("Could not connect to the database: %s", err)
-	}
+	logger.Info("Connected to the database")
 	// Start the gRPC server
 	listner, err := net.Listen("tcp", "localhost:50053")
 	// Check if there is an error while starting the server
 	if err != nil {
-		log.Fatalf("Failed to start server: %s", err)
+		logger.Fatal("Failed to start listener", zap.Error(err))
 	}
 	// Create a new gRPC server
 	grpcServer := grpc.NewServer(
@@ -49,11 +70,11 @@ func startServer() {
 
 	// Register the service with the server
 	orderpb.RegisterOrderServiceServer(grpcServer, &OrderService{})
-
+	logger.Info("gRPC server started on localhost:50053")
 	// Start the server in a new goroutine (concurrency) (Serve).
 	go func() {
 		if err := grpcServer.Serve(listner); err != nil {
-			log.Fatalf("Failed to serve: %s", err)
+			logger.Fatal("Failed to serve gRPC server", zap.Error(err))
 		}
 	}()
 	// Create a new gRPC-Gateway server (gateway).
@@ -64,7 +85,7 @@ func startServer() {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Fatalln("Failed to dial server:", err)
+		logger.Fatal("Failed to dial server", zap.Error(err))
 	}
 	// Create a new gRPC-Gateway mux (gateway).
 	gwmux := runtime.NewServeMux()
@@ -72,7 +93,7 @@ func startServer() {
 	// Register the service with the server (gateway).
 	err = orderpb.RegisterOrderServiceHandler(context.Background(), gwmux, connection)
 	if err != nil {
-		log.Fatalln("Failed to register gateway:", err)
+		logger.Fatal("Failed to register gRPC-Gateway", zap.Error(err))
 	}
 	// Create a new HTTP server (gateway). (Serve). (ListenAndServe)
 	gwServer := &http.Server{
@@ -80,8 +101,9 @@ func startServer() {
 		Handler: gwmux,
 	}
 
-	log.Println("Serving gRPC-Gateway on http://0.0.0.0:8093")
-	log.Fatalln(gwServer.ListenAndServe())
+	logger.Info("Serving gRPC-Gateway on http://0.0.0.0:8093")
+	logger.Fatal("Failed to serve gRPC-Gateway", zap.Error(gwServer.ListenAndServe()))
+
 }
 
 func main() {

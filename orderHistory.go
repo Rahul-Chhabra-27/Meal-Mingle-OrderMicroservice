@@ -2,20 +2,22 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"order-microservice/config"
 	"order-microservice/model"
 	orderpb "order-microservice/proto/order"
 	"strconv"
+
+	"go.uber.org/zap"
 )
 
 func (*OrderService) OrderHistory(ctx context.Context, request *orderpb.OrderHistoryRequest) (*orderpb.OrderHistoryResponse, error) {
 	// fetch the user email from the context
 	userEmail, ok := ctx.Value("userEmail").(string)
 	if !ok {
+		logger.Error("Failed to get user email from context")
 		return &orderpb.OrderHistoryResponse{
-			Message:    "",
-			StatusCode: 500,
+			Message:    "Server facing issues",
+			StatusCode: StatusInternalServerError,
 			Error:      "Internal Server Error",
 		}, nil
 	}
@@ -24,20 +26,20 @@ func (*OrderService) OrderHistory(ctx context.Context, request *orderpb.OrderHis
 	user.Email = userEmail
 	userDBConnector, err := config.GetUserConnector()
 	if err != nil {
-		fmt.Println("Failed to connect to database")
+		logger.Error("Failed to connect to user database", zap.Error(err))
 		return &orderpb.OrderHistoryResponse{
-			Message:    "",
-			StatusCode: 500,
+			Message:    "Server facing issues",
+			StatusCode: StatusInternalServerError,
 			Error:      "Internal Server Error",
 		}, nil
 	}
 	userDBConnector.Where("email = ?", user.Email).First(&user)
 	restaurantDBConnector, err := config.GetRestaurantConnector()
 	if err != nil {
-		fmt.Println("Failed to connect to database")
+		logger.Error("Failed to connect to user database", zap.Error(err))
 		return &orderpb.OrderHistoryResponse{
-			Message:    "",
-			StatusCode: 500,
+			Message:    "Server facing issues",
+			StatusCode: StatusInternalServerError,
 			Error:      "Internal Server Error",
 		}, nil
 	}
@@ -63,7 +65,7 @@ func (*OrderService) OrderHistory(ctx context.Context, request *orderpb.OrderHis
 			})
 		}
 		orderHistoryResponse.Data.Order = append(orderHistoryResponse.Data.Order, &orderpb.Order{
-			OrderId: strconv.FormatUint(uint64(order.ID), 10),
+			OrderId:         strconv.FormatUint(uint64(order.ID), 10),
 			OrderItems:      orderItemsResponse,
 			OrderTotalPrice: order.TotalPrice,
 			RestaurantName:  restaurant.Name,
@@ -71,7 +73,8 @@ func (*OrderService) OrderHistory(ctx context.Context, request *orderpb.OrderHis
 			ShippingAddress: order.ShippingAddress,
 		})
 	}
+	// Set success message and status code
 	orderHistoryResponse.Message = "Successfully fetched order history"
-	orderHistoryResponse.StatusCode = 200
+	orderHistoryResponse.StatusCode = StatusOK
 	return &orderHistoryResponse, nil
 }

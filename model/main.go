@@ -1,6 +1,10 @@
 package model
 
 import "gorm.io/gorm"
+const (
+	AdminRole = "admin"
+	UserRole = "user"
+)
 
 type OrderItem struct {
 	gorm.Model
@@ -28,15 +32,26 @@ type User struct {
 	Phone	string  `gorm:"unique"`
 	Address string
 	City string
+	Role string
 }
 
 type Restaurant struct {
 	gorm.Model 
 	Name string `gorm:"unique"`
-	Address string 	
 	Phone string `gorm:"unique"`
 	Availability string `gorm:"default:open"`
 	Rating float32 `gorm:"default:0"`
 	RestaurantOwnerMail string
+	ImageUrl string
+	OperationDays string
+	OperationHours string
+}
+
+type Address struct {
+	gorm.Model
+	RestaurantId uint `gorm:"foreignKey:RestaurantId;references:ID;uniqueIndex:idx_restaurant_address"` // foreign key referencing the primary key of the Restaurant table
+	StreetName string
+	Pincode string
 	City string
+	Country string
 }

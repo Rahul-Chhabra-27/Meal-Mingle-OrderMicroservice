@@ -19,9 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	OrderService_AddOrder_FullMethodName     = "/proto.OrderService/AddOrder"
-	OrderService_OrderHistory_FullMethodName = "/proto.OrderService/OrderHistory"
-	OrderService_CancelOrder_FullMethodName  = "/proto.OrderService/CancelOrder"
+	OrderService_AddOrder_FullMethodName          = "/proto.OrderService/AddOrder"
+	OrderService_OrderHistory_FullMethodName      = "/proto.OrderService/OrderHistory"
+	OrderService_CancelOrder_FullMethodName       = "/proto.OrderService/CancelOrder"
+	OrderService_ChangeOrderStatus_FullMethodName = "/proto.OrderService/ChangeOrderStatus"
 )
 
 // OrderServiceClient is the client API for OrderService service.
@@ -31,6 +32,7 @@ type OrderServiceClient interface {
 	AddOrder(ctx context.Context, in *AddOrderRequest, opts ...grpc.CallOption) (*AddOrderResponse, error)
 	OrderHistory(ctx context.Context, in *OrderHistoryRequest, opts ...grpc.CallOption) (*OrderHistoryResponse, error)
 	CancelOrder(ctx context.Context, in *CancelOrderRequest, opts ...grpc.CallOption) (*CancelOrderResponse, error)
+	ChangeOrderStatus(ctx context.Context, in *ChangeOrderStatusRequest, opts ...grpc.CallOption) (*ChangeOrderStatusResponse, error)
 }
 
 type orderServiceClient struct {
@@ -71,6 +73,16 @@ func (c *orderServiceClient) CancelOrder(ctx context.Context, in *CancelOrderReq
 	return out, nil
 }
 
+func (c *orderServiceClient) ChangeOrderStatus(ctx context.Context, in *ChangeOrderStatusRequest, opts ...grpc.CallOption) (*ChangeOrderStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ChangeOrderStatusResponse)
+	err := c.cc.Invoke(ctx, OrderService_ChangeOrderStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrderServiceServer is the server API for OrderService service.
 // All implementations must embed UnimplementedOrderServiceServer
 // for forward compatibility
@@ -78,6 +90,7 @@ type OrderServiceServer interface {
 	AddOrder(context.Context, *AddOrderRequest) (*AddOrderResponse, error)
 	OrderHistory(context.Context, *OrderHistoryRequest) (*OrderHistoryResponse, error)
 	CancelOrder(context.Context, *CancelOrderRequest) (*CancelOrderResponse, error)
+	ChangeOrderStatus(context.Context, *ChangeOrderStatusRequest) (*ChangeOrderStatusResponse, error)
 	mustEmbedUnimplementedOrderServiceServer()
 }
 
@@ -93,6 +106,9 @@ func (UnimplementedOrderServiceServer) OrderHistory(context.Context, *OrderHisto
 }
 func (UnimplementedOrderServiceServer) CancelOrder(context.Context, *CancelOrderRequest) (*CancelOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelOrder not implemented")
+}
+func (UnimplementedOrderServiceServer) ChangeOrderStatus(context.Context, *ChangeOrderStatusRequest) (*ChangeOrderStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangeOrderStatus not implemented")
 }
 func (UnimplementedOrderServiceServer) mustEmbedUnimplementedOrderServiceServer() {}
 
@@ -161,6 +177,24 @@ func _OrderService_CancelOrder_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrderService_ChangeOrderStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChangeOrderStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).ChangeOrderStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_ChangeOrderStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).ChangeOrderStatus(ctx, req.(*ChangeOrderStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // OrderService_ServiceDesc is the grpc.ServiceDesc for OrderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -179,6 +213,10 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CancelOrder",
 			Handler:    _OrderService_CancelOrder_Handler,
+		},
+		{
+			MethodName: "ChangeOrderStatus",
+			Handler:    _OrderService_ChangeOrderStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -21,21 +21,21 @@ type PageVariables struct {
 	Contact string
 }
 
-func Caller(amount int) (string){
-	statusChannel := make(chan string);
+func Caller(amount int) string {
+	statusChannel := make(chan string)
 	router := gin.Default()
 	router.LoadHTMLGlob("*.html")
 	router.GET("/", func(c *gin.Context) {
 		App(c, amount*100)
 	})
-	router.GET("/payment-fail", func(c *gin.Context) {	
+	router.GET("/payment-fail", func(c *gin.Context) {
 		fmt.Println("Payment Failed")
-		PaymentFaliure(c,statusChannel)
+		PaymentFaliure(c, statusChannel)
 	})
 
-	router.GET("/payment-complete",func (c *gin.Context){
+	router.GET("/payment-complete", func(c *gin.Context) {
 		fmt.Println("Payment Page")
-		PaymentSuccess(c,statusChannel)
+		PaymentSuccess(c, statusChannel)
 	})
 	srv := &http.Server{
 		Addr:    ":8089",
@@ -51,22 +51,26 @@ func Caller(amount int) (string){
 	fmt.Println("Server is running on port 8089")
 
 	// create a timer and exit the server in 1 minute
-	time.AfterFunc(1*time.Minute, func() {
+	time.AfterFunc(45*time.Second, func() {
 		fmt.Println("Shutting down server...")
 		if err := srv.Shutdown(context.Background()); err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println("Server gracefully stopped")
 	})
-	 // Wait for a payment status to be sent to the channel or for a timeout
-	select
-	{
-	case status := <-statusChannel:
-		return status
+	// Wait for a payment status to be sent to the channel or for a timeout
+	select {
+	case <-time.After(45 * time.Second):
+		select {
+		case status := <-statusChannel:
+			return status
+		default:
+			return "no-status"
+		}
 	case <-time.After(1 * time.Minute):
 		return "payment-failed"
 	}
-	
+
 }
 
 func App(c *gin.Context, amount int) {
@@ -106,7 +110,7 @@ func App(c *gin.Context, amount int) {
 	c.HTML(http.StatusOK, "app.html", HomePageVars)
 }
 
-func PaymentSuccess(c *gin.Context, statusChannel chan <- string)  {
+func PaymentSuccess(c *gin.Context, statusChannel chan<- string) {
 	fmt.Println("Payment Successfull")
 	paymentid := c.Query("paymentid")
 	orderid := c.Query("orderid")
@@ -121,7 +125,7 @@ func PaymentSuccess(c *gin.Context, statusChannel chan <- string)  {
 	c.Redirect(http.StatusFound, "http://localhost:3000/orders")
 }
 
-func PaymentFaliure(c *gin.Context, statusChannel chan <- string) {
+func PaymentFaliure(c *gin.Context, statusChannel chan<- string) {
 	statusChannel <- "Payment Failed"
 	c.Redirect(http.StatusFound, "http://localhost:3000/orders")
 }

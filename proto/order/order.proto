@@ -52,6 +52,20 @@ message CancelOrderResponse {
     string error = 3;
     int64 statusCode = 4;
 }
+message ChangeOrderStatusRequest {
+    string orderId = 1;
+    string orderStatus = 2;
+}
+message ChangeOrderStatusResponseData {
+    string orderId = 1;
+    string orderStatus = 2;
+}
+message ChangeOrderStatusResponse {
+    ChangeOrderStatusResponseData data = 1;
+    string message = 2;
+    string error = 3;
+    int64 statusCode = 4;
+}
 service OrderService {
    rpc AddOrder(AddOrderRequest) returns (AddOrderResponse){
         option (google.api.http) = {
@@ -67,6 +81,12 @@ service OrderService {
     rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse){
         option (google.api.http) = {
             delete: "/api/orders/{orderId}"
+        };
+    }
+    rpc ChangeOrderStatus(ChangeOrderStatusRequest) returns (ChangeOrderStatusResponse){
+        option (google.api.http) = {
+            patch: "/api/orders/{orderId}"
+            body: "*"
         };
     }
 }
