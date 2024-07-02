@@ -122,7 +122,7 @@ func PaymentSuccess(c *gin.Context, statusChannel chan<- string) {
 
 	statusChannel <- "Payment Successfull"
 	fmt.Println("Payment Successfull")
-	c.Redirect(http.StatusFound, "http://localhost:3000/orders")
+	c.Redirect(http.StatusFound, "http://localhost:3000/payment-success")
 }
 
 func PaymentFaliure(c *gin.Context, statusChannel chan<- string) {
