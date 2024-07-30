@@ -8,6 +8,7 @@ import (
 	"order-microservice/jwt"
 	orderpb "order-microservice/proto/order"
 
+	"github.com/gorilla/handlers"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
@@ -19,6 +20,7 @@ import (
 type OrderService struct {
 	orderpb.UnimplementedOrderServiceServer
 }
+
 const (
 	StatusOK                  = 200
 	StatusBadRequest          = 400
@@ -27,6 +29,7 @@ const (
 	StatusNotFound            = 404
 	StatusInternalServerError = 500
 )
+
 var (
 	orderDBConnector     *gorm.DB
 	orderItemDBConnector *gorm.DB
@@ -95,10 +98,17 @@ func startServer() {
 	if err != nil {
 		logger.Fatal("Failed to register gRPC-Gateway", zap.Error(err))
 	}
+	// Enable CORS
+	corsOrigins := handlers.AllowedOrigins([]string{"http://localhost:3000"})
+	corsMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
+	corsHeaders := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
+	corsHandler := handlers.CORS(corsOrigins, corsMethods, corsHeaders)
+	wrappedGwmux := corsHandler(gwmux)
+
 	// Create a new HTTP server (gateway). (Serve). (ListenAndServe)
 	gwServer := &http.Server{
 		Addr:    ":8093",
-		Handler: gwmux,
+		Handler: wrappedGwmux,
 	}
 
 	logger.Info("Serving gRPC-Gateway on http://0.0.0.0:8093")

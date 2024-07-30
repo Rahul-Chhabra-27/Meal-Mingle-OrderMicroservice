@@ -4,6 +4,9 @@ FROM golang:1.22.2-alpine3.19
 # Move to working directory /app
 WORKDIR /app
 
+RUN apk add --no-cache bash
+
+
 # Copy the code into the container
 COPY . .
 
@@ -15,4 +18,4 @@ EXPOSE 8093
 # Expose PORT 8089 for payment gateway.
 EXPOSE 8089
 # Command to run the application when starting the container
-CMD ["go","run","."]
+CMD ["go", "run", "."]

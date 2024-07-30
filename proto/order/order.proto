@@ -15,6 +15,7 @@ message AddOrderRequest {
     int64 orderTotalPrice = 2;
     string restaurantName = 3;
     string shippingAddress = 4;
+    string orderDiscount = 5;
 }
 message data {
     repeated Order order = 1;
@@ -35,6 +36,7 @@ message Order {
     string restaurantName = 4;
     string shippingAddress = 5;
     string orderStatus=6;
+    string discountCode=7;
 }
 message OrderHistoryRequest {}
 message OrderHistoryResponse {

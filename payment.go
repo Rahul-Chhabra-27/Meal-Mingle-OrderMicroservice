@@ -78,7 +78,7 @@ func App(c *gin.Context, amount int) {
 	page := &PageVariables{}
 	page.Amount = strconv.Itoa(amount)
 	page.Email = "rahul.c@prograd.org"
-	page.Name = "Rahul Chhabra"
+	page.Name = "john Doe"
 	page.Contact = "7906936789"
 	//Create order_id from the server
 	client := razorpay.NewClient("rzp_test_p4bR8DXSKNi8tJ", "JDcoQd2EgIcodZR1vGparqCq")
@@ -127,5 +127,5 @@ func PaymentSuccess(c *gin.Context, statusChannel chan<- string) {
 
 func PaymentFaliure(c *gin.Context, statusChannel chan<- string) {
 	statusChannel <- "Payment Failed"
-	c.Redirect(http.StatusFound, "http://localhost:3000/orders")
+	c.Redirect(http.StatusFound, "http://localhost:3000/order-history")
 }

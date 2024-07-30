@@ -96,8 +96,8 @@ func (*OrderService) AddOrder(ctx context.Context, request *orderpb.AddOrderRequ
 	order.RestaurantId = restaurant.ID
 	order.TotalPrice = request.OrderTotalPrice
 	order.UserId = user.ID
-	order.Status = "Processing"
-	order.Discount = 0
+	order.Status = "Pending"
+	order.Discount = request.OrderDiscount
 	order.ShippingAddress = request.ShippingAddress
 	// insert the order into the database.
 	orderDBConnector.Create(&order)
@@ -126,7 +126,7 @@ func (*OrderService) AddOrder(ctx context.Context, request *orderpb.AddOrderRequ
 					OrderItems:      request.OrderItems,
 					OrderTotalPrice: order.TotalPrice,
 					RestaurantName:  restaurant.Name,
-					OrderStatus:     "Processing🍔",
+					OrderStatus:     "Pending🍔",
 					ShippingAddress: request.ShippingAddress,
 				},
 			},
